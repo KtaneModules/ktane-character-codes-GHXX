@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class TheDealmakerScript : MonoBehaviour
+public class CharacterCodes : MonoBehaviour
 {
 
     public KMAudio Audio;
