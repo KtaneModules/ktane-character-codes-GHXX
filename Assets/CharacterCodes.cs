@@ -10,9 +10,9 @@ public class CharacterCodes : MonoBehaviour
     public KMAudio Audio;
     public KMBombInfo BombInfo;
 
-    public KMSelectable ButtonDeal;
-    public KMSelectable ButtonRenew;
-    public TextMesh DealDisplayText;
+    public KMSelectable BaseButton;
+    private List<KMSelectable> NumberButtons;
+    public TextMesh DisplayTextMesh;
 
 
     static int moduleIdCounter = 1;
