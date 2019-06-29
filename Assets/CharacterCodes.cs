@@ -9,7 +9,7 @@ public class CharacterCodes : MonoBehaviour
     public KMAudio Audio;
     public KMBombInfo BombInfo;
 
-    public KMSelectable[] Buttons;
+    public KMSelectable[] NumberButtons;
     public KMSelectable DisplayButton;
     public TextMesh DisplayTextMesh;
 
@@ -18,7 +18,6 @@ public class CharacterCodes : MonoBehaviour
     int moduleId;
     private bool moduleSolved;
 
-    private List<KMSelectable> NumberButtons = new List<KMSelectable>();
     private static readonly MonoRandom rand = new MonoRandom();
     private const string charRanges = "1-31, 33-47, 58-64, 91-96, 123-127, 166-249, 251-255, 697-705, 708-759, 761-767 890-893, 901, 916, 926, 928, 936, 946-948, 950-952, 957-958, 961-962, 965, 967-969, 976-979, 981-987, 990-1000, 1002, 1004-1005, 1008-1010, 1012-1023, 1026, 1028-1030, 1032-1035, 1039-1051, 1059, 1061-1073, 1083, 1119-1122, 1124, 1126, 1128, 1130, 1132, 1134, 1136, 1139, 1149";
     private static List<char> characters = charRanges
@@ -90,21 +89,12 @@ public class CharacterCodes : MonoBehaviour
         Log("Initialized with seed: " + rand.Seed);
         this.DisplayTextMesh.text = ""; // clear display
 
-        // generate buttons
-        this.NumberButtons.Add(this.BaseButton);
-        //var colliderSize = this.BaseButton.GetComponentInChildren<BoxCollider>().size;
+        // set button positions
         for (int i = 1; i < 10; i++)
         {
-            instance.transform.position = this.BaseButton.transform.position;
-            instance.transform.localScale = this.BaseButton.transform.localScale;
-            instance.transform.Translate(0.0245f * (i % 5), 0.028f * (i / 5),0);
-            var highlight = instance.transform.GetComponentInChildren<KMHighlightable>().gameObject;
-            var boxCollider = highlight.AddComponent<BoxCollider>();
-            //boxCollider.size = this.BaseButton.GetComponentInChildren<BoxCollider>().size;
-            var testSelectableArea = highlight.AddComponent<TestSelectableArea>();
-            testSelectableArea.Selectable = instance.GetComponent<TestSelectable>();
-            this.NumberButtons.Add(instance);
-            this.BaseButton.transform.parent.GetComponent<KMSelectable>().Children[i + 1] = this.NumberButtons[i]; // setup selectables
+            this.NumberButtons[i].transform.position = this.NumberButtons[0].transform.position;
+            this.NumberButtons[i].transform.localScale = this.NumberButtons[0].transform.localScale;
+            this.NumberButtons[i].transform.Translate(0.0245f * (i % 5), 0.028f * (i / 5), 0);
         }
 
         GetComponent<KMBombModule>().OnActivate += ModuleActivated;
