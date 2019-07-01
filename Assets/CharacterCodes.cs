@@ -13,6 +13,8 @@ public class CharacterCodes : MonoBehaviour
     public KMSelectable[] NumberButtons;
     public KMSelectable DisplayButton;
     public TextMesh DisplayTextMesh;
+    public Material LCDCoverUpMaterial;
+    public MeshRenderer LCDRenderMesh;
 
 
     static int moduleIdCounter = 1;
@@ -70,6 +72,7 @@ public class CharacterCodes : MonoBehaviour
     private byte[] expectedCode;
     private List<byte> enteredCode;
     private string[] chosenLetters = new string[5];
+    private bool lcdIsBlackened = false;
 
     private void ModuleActivated()
     {
@@ -80,6 +83,15 @@ public class CharacterCodes : MonoBehaviour
             var digit = byte.Parse(this.NumberButtons[i].name.Last().ToString());
             var button = this.NumberButtons[i];
             this.NumberButtons[i].OnInteract += () => { NumberButtonPress(digit, button); return false; };
+        }
+        this.DisplayButton.OnInteract += () => { DisplayButtonPress(); return false; };
+    }
+
+    private void DisplayButtonPress()
+    {
+        if (rand.NextDouble() < 0.8)
+        {
+            DisableDisplayBlackening();
         }
     }
 
@@ -162,6 +174,19 @@ public class CharacterCodes : MonoBehaviour
         Log("Letter generation finished. Expected code: " + string.Join(null, this.expectedCode.Select(x => x.ToString()).ToArray()));
     }
 
+    private void DisableDisplayBlackening()
+    {
+        this.lcdIsBlackened = false;
+        this.LCDRenderMesh.enabled = false;
+    }
+
+    private void SetRandomDisplayBlackening()
+    {
+        this.LCDRenderMesh.enabled = true;
+        this.LCDCoverUpMaterial.mainTextureOffset = new Vector2((float)(rand.NextDouble() * 2 - 1), (float)(rand.NextDouble() * 2 - 1));
+        this.LCDCoverUpMaterial.mainTextureScale = new Vector2((float)(rand.NextDouble() * 2 - 1), (float)(rand.NextDouble() * 2 - 1));
+    }
+
     private List<byte> GetDigits(ushort number)
     {
         var result = new List<byte>();
@@ -176,14 +201,32 @@ public class CharacterCodes : MonoBehaviour
     }
 
     float i = 0;
-    const int framesPerUpdate = 5;
+    const int framesPerUpdate = 120;
     public void Update()
     {
         this.i += Time.deltaTime * 60;
         if (this.i > framesPerUpdate)
         {
             this.i %= framesPerUpdate;
+            if (!this.lcdIsBlackened && rand.NextDouble() < 0.05f)
+                StartCoroutine(BlackenDisplay());
+        }
+    }
 
+    private IEnumerator BlackenDisplay(bool initial = true)
+    {
+        if (initial)
+        {
+            this.lcdIsBlackened = true;
+            SetRandomDisplayBlackening();
+        }
+
+        if (this.LCDRenderMesh.enabled)
+        {
+            this.LCDCoverUpMaterial.mainTextureOffset = Vector2.MoveTowards(this.LCDCoverUpMaterial.mainTextureOffset, Vector2.zero, .1f);
+            this.LCDCoverUpMaterial.mainTextureScale = Vector2.Scale(this.LCDCoverUpMaterial.mainTextureScale, new Vector2((float)(rand.NextDouble() * 0.05 + 0.95), (float)(rand.NextDouble() * 0.05 + 0.95)));
+            yield return new WaitForSeconds(0.05f);
+            yield return BlackenDisplay(false);
         }
     }
 
@@ -219,27 +262,41 @@ public class CharacterCodes : MonoBehaviour
     }
 
 
-    ////twitch plays
-    //protected readonly string TwitchHelpMessage = @"!{0} deal [Presses the DEAL!-button] | !{0} nodeal [Fetches a new deal]";
+    //twitch plays
+    protected readonly string TwitchHelpMessage = @"!{0} press 1234 [Presses the buttons 1, 2, 3 and 4 in this order] | !{0} tap [Taps the display to try to make it work again.]";
 
-    //protected IEnumerator ProcessTwitchCommand(string command)
-    //{
-    //    var lowered = command.ToLowerInvariant().Replace(" ", null).TrimEnd('!', '.');
+    protected IEnumerator ProcessTwitchCommand(string command)
+    {
+        var lowered = command.ToLowerInvariant().Split(' ').First();
+        var arg = command.ToLowerInvariant().Split(' ').Skip(1).Join(" ").Replace(" ", null);
 
-    //    switch (lowered)
-    //    {
-    //        case "deal":
-    //            yield return null;
-    //            yield return new[] { this.ButtonDeal };
-    //            break;
+        switch (lowered)
+        {
+            case "press":
+                yield return null;
+                //yield return new[] { this.ButtonDeal };
+                int _a;
+                var badChar = arg.Select(x => x.ToString()).FirstOrDefault(x => !int.TryParse(x.ToString(), out _a));
+                if (badChar != null)
+                {
+                    throw new FormatException("The button " + badChar + " could not be found.");
+                }
 
-    //        case "nodeal":
-    //            yield return null;
-    //            yield return new[] { this.ButtonRenew };
-    //            break;
+                var buttonsToPress = arg.Select(x => this.NumberButtons[(int.Parse(x.ToString()) + 9) % 10]).ToArray();
+                foreach (var button in buttonsToPress)
+                {
+                    yield return new WaitForSeconds(1);
+                    yield return new[] { button };
+                }
+                break;
 
-    //        default:
-    //            yield break;
-    //    }
-    //}
+            case "tap":
+                yield return null;
+                yield return new[] { this.DisplayButton };
+                break;
+
+            default:
+                yield break;
+        }
+    }
 }
