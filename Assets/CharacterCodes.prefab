@@ -644,7 +644,7 @@ GameObject:
   m_PrefabInternal: {fileID: 100100000}
   serializedVersion: 5
   m_Component:
-  - component: {fileID: 4271538574512668}
+  - component: {fileID: 224444087017135684}
   - component: {fileID: 23952636542353438}
   - component: {fileID: 102771934815503970}
   - component: {fileID: 114861816456971514}
@@ -859,19 +859,6 @@ Transform:
   m_Father: {fileID: 4383087001201898}
   m_RootOrder: 12
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!4 &4271538574512668
-Transform:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1959836576160480}
-  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071067}
-  m_LocalPosition: {x: -0.444, y: 0.51, z: 0.395}
-  m_LocalScale: {x: 0.032, y: 0.11, z: 1}
-  m_Children: []
-  m_Father: {fileID: 4587280979442542}
-  m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
 --- !u!4 &4277591866739350
 Transform:
   m_ObjectHideFlags: 1
@@ -967,7 +954,7 @@ Transform:
   m_LocalScale: {x: 0.979, y: 0.11, z: 0.95}
   m_Children: []
   m_Father: {fileID: 4587280979442542}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &4436873730320542
 Transform:
@@ -1077,8 +1064,8 @@ Transform:
   m_LocalScale: {x: 0.115, y: 0.02, z: 0.054704655}
   m_Children:
   - {fileID: 4449618648635682}
-  - {fileID: 4271538574512668}
   - {fileID: 4425682519340304}
+  - {fileID: 224444087017135684}
   m_Father: {fileID: 4383087001201898}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: -360, z: 0}
@@ -2506,12 +2493,12 @@ TextMesh:
   m_OffsetZ: 0
   m_CharacterSize: 1.1
   m_LineSpacing: 1.4
-  m_Anchor: 0
-  m_Alignment: 0
+  m_Anchor: 4
+  m_Alignment: 1
   m_TabSize: 4
   m_FontSize: 90
   m_FontStyle: 0
-  m_RichText: 1
+  m_RichText: 0
   m_Font: {fileID: 12800000, guid: 1ebe1d96973a920409b439b3a0e2bb63, type: 3}
   m_Color:
     serializedVersion: 2
@@ -3115,7 +3102,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Parent: {fileID: 114102023130756034}
   Children: []
-  IsPassThrough: 0
+  IsPassThrough: 1
   ChildRowLength: 0
   Highlight: {fileID: 114938163808980162}
   SelectableColliders: []
@@ -3353,3 +3340,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShaderNames:
   - KT/Mobile/DiffuseTint
+--- !u!224 &224444087017135684
+RectTransform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1959836576160480}
+  m_LocalRotation: {x: 0.7071068, y: -0, z: -0, w: 0.7071067}
+  m_LocalPosition: {x: 0, y: 0, z: 0.0097}
+  m_LocalScale: {x: 0.032, y: 0.10999993, z: 1}
+  m_Children: []
+  m_Father: {fileID: 4587280979442542}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -0.0065, y: 0.51}
+  m_SizeDelta: {x: 29.435, y: 8.2756}
+  m_Pivot: {x: 0.5, y: 0.5}

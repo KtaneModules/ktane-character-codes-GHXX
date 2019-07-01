@@ -18,19 +18,60 @@ public class CharacterCodes : MonoBehaviour
     int moduleId;
     private bool moduleSolved;
 
-    private static readonly MonoRandom rand = new MonoRandom();
-    private const string charRanges = "1-31, 33-47, 58-64, 91-96, 123-127, 166-249, 251-255, 697-705, 708-759, 761-767 890-893, 901, 916, 926, 928, 936, 946-948, 950-952, 957-958, 961-962, 965, 967-969, 976-979, 981-987, 990-1000, 1002, 1004-1005, 1008-1010, 1012-1023, 1026, 1028-1030, 1032-1035, 1039-1051, 1059, 1061-1073, 1083, 1119-1122, 1124, 1126, 1128, 1130, 1132, 1134, 1136, 1139, 1149";
-    private static List<char> characters = charRanges
-        .Replace(" ", null)
-        .Split(',')
-        .Select(x => x.Contains('-') ? x.Split('-').Select(y => int.Parse(y)).ToArray() : new int[] { int.Parse(x) })
-        .SelectMany(x => x.Length == 1 ? new[] { (char)x[0] } : Enumerable.Range(x[0], x[1] - x[0]).Select(y => (char)y).ToArray())
-        .ToList();
+    private const int letterCount = 5;
+    private static readonly MonoRandom rand = new MonoRandom(); // todo replace with unity random number gen.
+    private static readonly Dictionary<ushort, string> characterList = new Dictionary<ushort, string>
+    {
+        {1, "☺"}, {185, "╣"}, {712, "ˈ"}, {982, "ϖ"}, {2, "☻"}, {186, "║"}, {713, "ˉ"}, {983, "ϗ"},
+        {3, "♥"}, {187, "╗"}, {714, "ˊ"}, {984, "Ϙ"}, {4, "♦"}, {188, "╝"}, {715, "ˋ"}, {985, "ϙ"},
+        {5, "♣"}, {189, "╜"}, {716, "ˌ"}, {986, "Ϛ"}, {6, "♠"}, {190, "╛"}, {717, "ˍ"}, {987, "ϛ"},
+        {7, "•"}, {191, "┐"}, {718, "ˎ"}, {990, "Ϟ"}, {8, "◘"}, {192, "└"}, {719, "ˏ"}, {991, "ϟ"},
+        {9, "○"}, {193, "┴"}, {720, "ː"}, {992, "Ϡ"}, {10, "◙"}, {194, "┬"}, {721, "ˑ"}, {993, "ϡ"},
+        {11, "♂"}, {195, "├"}, {722, "˒"}, {994, "Ϣ"}, {12, "♀"}, {196, "─"}, {723, "˓"}, {995, "ϣ"},
+        {13, "♪"}, {197, "┼"}, {724, "˔"}, {996, "Ϥ"}, {14, "♫"}, {198, "╞"}, {725, "˕"}, {998, "Ϧ"},
+        {15, "☼"}, {199, "╟"}, {726, "˖"}, {999, "ϧ"}, {16, "►"}, {200, "╚"}, {727, "˗"}, {1000, "Ϩ"},
+        {17, "◄"}, {201, "╔"}, {728, "˘"}, {1002, "Ϫ"}, {18, "↕"}, {202, "╩"}, {729, "˙"}, {1004, "Ϭ"},
+        {19, "‼"}, {203, "╦"}, {730, "˚"}, {1005, "ϭ"}, {20, "¶"}, {204, "╠"}, {731, "˛"}, {1008, "ϰ"},
+        {21, "§"}, {205, "═"}, {732, "˜"}, {1009, "ϱ"}, {22, "▬"}, {206, "╬"}, {733, "˝"}, {1010, "ϲ"},
+        {23, "↨"}, {207, "╧"}, {734, "˞"}, {1012, "ϴ"}, {24, "↑"}, {208, "╨"}, {735, "˟"}, {1013, "ϵ"},
+        {25, "↓"}, {209, "╤"}, {736, "ˠ"}, {1014, "϶"}, {26, "→"}, {210, "╥"}, {737, "ˡ"}, {1015, "Ϸ"},
+        {27, "←"}, {211, "╙"}, {738, "ˢ"}, {1016, "ϸ"}, {28, "∟"}, {212, "╘"}, {739, "ˣ"}, {1017, "Ϲ"},
+        {29, "↔"}, {213, "╒"}, {740, "ˤ"}, {1018, "Ϻ"}, {30, "▲"}, {214, "╓"}, {741, "˥"}, {1019, "ϻ"},
+        {31, "▼"}, {215, "╫"}, {742, "˦"}, {1020, "ϼ"}, {33, "!"}, {216, "╪"}, {743, "˧"}, {1021, "Ͻ"},
+        {34, "“"}, {217, "┘"}, {744, "˨"}, {1022, "Ͼ"}, {35, "#"}, {218, "┌"}, {745, "˩"}, {1023, "Ͽ"},
+        {36, "$"}, {219, "█"}, {746, "˪"}, {1026, "Ђ"}, {37, "%"}, {220, "▄"}, {747, "˫"}, {1028, "Є"},
+        {38, "&"}, {221, "▬"}, {748, "ˬ"}, {1029, "Ѕ"}, {39, "‘"}, {222, "▐"}, {749, "˭"}, {1030, "І"},
+        {40, "("}, {223, "▀"}, {750, "ˮ"}, {1032, "Ј"}, {41, ")"}, {224, "α"}, {751, "˯"}, {1033, "Љ"},
+        {42, "*"}, {225, "ß"}, {752, "˰"}, {1034, "Њ"}, {43, "+"}, {226, "Γ"}, {753, "˱"}, {1035, "Ћ"},
+        {44, ","}, {227, "π"}, {754, "˲"}, {1039, "Џ"}, {45, "-"}, {228, "Σ"}, {755, "˳"}, {1040, "А"},
+        {46, "."}, {229, "σ"}, {756, "˴"}, {1041, "Б"}, {47, "/"}, {230, "µ"}, {757, "˵"}, {1042, "В"},
+        {58, ":"}, {231, "τ"}, {758, "˶"}, {1043, "Г"}, {59, ";"}, {232, "Φ"}, {759, "˷"}, {1044, "Д"},
+        {60, "<"}, {233, "Θ"}, {761, "˹"}, {1045, "Е"}, {61, "="}, {234, "Ω"}, {762, "˺"}, {1046, "Ж"},
+        {62, ">"}, {235, "δ"}, {763, "˻"}, {1047, "З"}, {63, "?"}, {236, "∞"}, {764, "˼"}, {1048, "И"},
+        {64, "@"}, {237, "φ"}, {765, "˽"}, {1049, "Й"}, {91, "["}, {238, "ε"}, {766, "˾"}, {1050, "К"},
+        {92, "\\"}, {239, "∩"}, {767, "˿"}, {1051, "Л"}, {93, "]"}, {240, "≡"}, {890, "ͺ"}, {1059, "У"},
+        {94, "^"}, {241, "±"}, {891, "ͻ"}, {1061, "Х"}, {95, "_"}, {242, "≥"}, {892, "ͼ"}, {1062, "Ц"},
+        {96, "`"}, {243, "≤"}, {893, "ͽ"}, {1063, "Ч"}, {123, "{"}, {244, "⌠"}, {901, "΅"}, {1064, "Ш"},
+        {124, "|"}, {245, "⌡"}, {916, "Δ"}, {1065, "Щ"}, {125, "}"}, {246, "÷"}, {926, "Ξ"}, {1066, "Ъ"},
+        {126, "~"}, {247, "≈"}, {928, "Π"}, {1067, "Ы"}, {127, "⌂"}, {248, "°"}, {936, "Ψ"}, {1068, "Ь"},
+        {166, "ª"}, {249, "∙"}, {946, "β"}, {1069, "Э"}, {167, "º"}, {251, "√"}, {947, "γ"}, {1070, "Ю"},
+        {168, "¿"}, {252, "ⁿ"}, {948, "δ"}, {1071, "Я"}, {169, "⌐"}, {253, "²"}, {950, "ζ"}, {1072, "а"},
+        {170, "¬"}, {254, "■"}, {951, "η"}, {1073, "б"}, {171, "½"}, {153, "™"}, {952, "θ"}, {1083, "л"},
+        {172, "¼"}, {697, "ʹ"}, {957, "ν"}, {1119, "џ"}, {173, "¡"}, {698, "ʺ"}, {958, "ξ"}, {1120, "Ѡ"},
+        {174, "«"}, {699, "ʻ"}, {961, "ρ"}, {1121, "ѡ"}, {175, "»"}, {700, "ʼ"}, {962, "ς"}, {1122, "Ѣ"},
+        {176, "░"}, {701, "ʽ"}, {965, "υ"}, {1124, "Ѥ"}, {177, "▒"}, {702, "ʾ"}, {967, "χ"}, {1126, "Ѧ"},
+        {178, "▓"}, {703, "ʿ"}, {968, "ψ"}, {1128, "Ѩ"}, {179, "│"}, {704, "ˀ"}, {969, "ω"}, {1130, "Ѫ"},
+        {180, "┤"}, {705, "ˁ"}, {976, "ϐ"}, {1132, "Ѭ"}, {181, "╡"}, {708, "˄"}, {977, "ϑ"}, {1134, "Ѯ"},
+        {182, "╢"}, {709, "˅"}, {978, "ϒ"}, {1136, "Ѱ"}, {183, "╖"}, {710, "ˆ"}, {979, "ϓ"}, {1139, "ѳ"},
+        {184, "╕"}, {711, "ˇ"}, {981, "ϕ"}, {1149, "ѽ"}
+    };
+
+    private byte[] expectedCode;
+    private string[] chosenLetters = new string[5];
 
     private void ModuleActivated()
     {
-        this.moduleId = moduleIdCounter++;
-
+        SetTextAndAutoScale(string.Join(" ", this.chosenLetters));
         //RenewDeal();
 
         //this.ButtonDeal.OnInteract += () => { ButtonDealPress(); return false; };
@@ -86,6 +127,7 @@ public class CharacterCodes : MonoBehaviour
     // Use this for initialization
     public void Start()
     {
+        this.moduleId = moduleIdCounter++;
         Log("Initialized with seed: " + rand.Seed);
         this.DisplayTextMesh.text = ""; // clear display
 
@@ -96,8 +138,30 @@ public class CharacterCodes : MonoBehaviour
             this.NumberButtons[i].transform.localScale = this.NumberButtons[0].transform.localScale;
             this.NumberButtons[i].transform.Translate(0.0245f * (i % 5), 0.028f * (i / 5), 0);
         }
-
         GetComponent<KMBombModule>().OnActivate += ModuleActivated;
+
+        // pick characters
+        var len = characterList.Count;
+        var chosenLetterKVs = new List<KeyValuePair<ushort, string>>(letterCount);
+        for (int i = 0; i < letterCount; i++)
+        {
+            chosenLetterKVs.Add(characterList.ElementAt(rand.Next(len)));
+        }
+        this.chosenLetters = chosenLetterKVs.Select(x => x.Value).ToArray();
+        this.expectedCode = chosenLetterKVs.SelectMany(x => GetDigits(x.Key)).ToArray();
+    }
+
+    private List<byte> GetDigits(ushort number)
+    {
+        var result = new List<byte>();
+        var factor = 1;
+        while (factor < ushort.MaxValue)
+        {
+            result.Add((byte)(number % (10 * factor) / factor));
+            factor *= 10;
+        }
+        bool wasNonZeroOnce = false;
+        return result.TakeWhile(x => wasNonZeroOnce = x != 0).Reverse().Cast<byte>().ToList();
     }
 
     float i = 0;
@@ -109,8 +173,33 @@ public class CharacterCodes : MonoBehaviour
         if (this.i > framesPerUpdate)
         {
             this.i %= framesPerUpdate;
-
+           
         }
+    }
+
+    private void SetTextAndAutoScale(string text)
+    {
+        this.DisplayTextMesh.text = text;
+
+        var tm = this.DisplayTextMesh.GetComponent<TextMesh>();
+        var rt = this.DisplayTextMesh.GetComponent<RectTransform>();
+        var rectSize = Vector2.Scale(rt.rect.size, new Vector2(7, 5));
+        int lastFontSize = 8;
+        var gs = new GUIStyle()
+        {
+            font = tm.font,
+            fontStyle = tm.fontStyle,
+            fontSize = lastFontSize + 1
+        };
+        var size = gs.CalcSize(new GUIContent(this.DisplayTextMesh.text));
+        while (size.x < rectSize.x && size.y < rectSize.y)
+        {
+            lastFontSize++;
+            gs.fontSize = lastFontSize + 1;
+            size = gs.CalcSize(new GUIContent(this.DisplayTextMesh.text));
+        }
+        Log("Scale limit was: " + (size.x >= rectSize.x ? "X" : "Y"));
+        tm.fontSize = lastFontSize;
     }
 
 
@@ -147,56 +236,5 @@ public class CharacterCodes : MonoBehaviour
     private T PickSeededRandom<T>(List<T> source)
     {
         return source[rand.Next(0, source.Count)];
-    }
-}
-
-
-internal class Currency
-{
-    internal readonly string currencyName;
-    internal readonly float currencyValue;
-
-    private Currency() { }
-
-    public Currency(string currencyName, float currencyValue)
-    {
-        this.currencyName = currencyName;
-        this.currencyValue = currencyValue;
-    }
-}
-
-internal class Unit
-{
-    internal readonly string unitName;
-    internal readonly string unitNamePlural;
-    internal readonly float unitValue;
-    internal readonly bool countable;
-
-    private Unit() { }
-
-    public Unit(string unitName, string unitNamePlural, float unitvalue, bool countable)
-    {
-        this.unitName = unitName;
-        this.unitNamePlural = unitNamePlural;
-        this.unitValue = unitvalue;
-        this.countable = countable;
-    }
-}
-
-public class DealItem
-{
-    internal readonly string friendlyName;
-    internal readonly string pluralFriendlyName;
-    internal readonly float value;
-    internal readonly bool countable;
-
-    private DealItem() { }
-
-    public DealItem(string friendlyName, string pluralFriendlyName, float value, bool countable)
-    {
-        this.friendlyName = friendlyName;
-        this.pluralFriendlyName = pluralFriendlyName;
-        this.value = value;
-        this.countable = countable;
     }
 }
