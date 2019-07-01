@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -67,62 +68,69 @@ public class CharacterCodes : MonoBehaviour
     };
 
     private byte[] expectedCode;
+    private List<byte> enteredCode;
     private string[] chosenLetters = new string[5];
 
     private void ModuleActivated()
     {
         SetTextAndAutoScale(string.Join(" ", this.chosenLetters));
-        //RenewDeal();
 
-        //this.ButtonDeal.OnInteract += () => { ButtonDealPress(); return false; };
-        //this.ButtonRenew.OnInteract += () => { ButtonRenewPress(); return false; };
+        for (int i = 0; i < this.NumberButtons.Length; i++) // set up button handlers
+        {
+            var digit = byte.Parse(this.NumberButtons[i].name.Last().ToString());
+            var button = this.NumberButtons[i];
+            this.NumberButtons[i].OnInteract += () => { NumberButtonPress(digit, button); return false; };
+        }
+    }
 
+    private void NumberButtonPress(byte digit, KMSelectable button)
+    {
+        if (this.moduleSolved)
+            return;
+
+        this.enteredCode.Add(digit);
+        RecheckCode();
+
+        StartCoroutine(DoButtonPressAndRelease(button));
+    }
+
+    private void RecheckCode()
+    {
+        for (int i = 0; i < Math.Min(this.enteredCode.Count, this.expectedCode.Length); i++)
+        {
+            if (this.enteredCode[i] != this.expectedCode[i])
+            {
+                // strike
+                Log("Digit #" + this.enteredCode.Count + " was wrong. Expected: " + this.expectedCode[i] + " Entered: " + this.enteredCode[i] + " Resetting input.");
+                this.enteredCode.Clear();
+                GetComponent<KMBombModule>().HandleStrike();
+                return;
+            }
+        }
+
+        if (this.enteredCode.Count == this.expectedCode.Length)
+        {
+            this.moduleSolved = true;
+            this.DisplayTextMesh.text = ""; // clear display
+            GetComponent<KMBombModule>().HandlePass();
+
+            Log("Last digit (#" + this.enteredCode.Count + ") was correct. - Module solved.");
+        }
+        else
+        {
+            Log("Digit #" + this.enteredCode.Count + " was correct.");
+        }
     }
 
     IEnumerator DoButtonPressAndRelease(KMSelectable button)
     {
         button.AddInteractionPunch(1);
-        button.transform.Translate(0, 0, -0.01f);
+        button.transform.Translate(0, 0, -0.005f);
         this.Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, button.transform);
         yield return new WaitForSeconds(1);
-        button.transform.Translate(0, 0, 0.01f);
+        button.transform.Translate(0, 0, 0.005f);
         this.Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonRelease, button.transform);
     }
-
-    //private void ButtonRenewPress()
-    //{
-    //    if (this.moduleSolved || this.textIsStillUpdating)
-    //        return;
-
-    //    if (this.isGoodDeal)
-    //        GetComponent<KMBombModule>().HandleStrike();
-
-    //    StartCoroutine(DoButtonPressAndRelease(this.ButtonRenew));
-    //    RenewDeal();
-    //}
-
-    //private void ButtonDealPress()
-    //{
-    //    if (this.moduleSolved || this.textIsStillUpdating)
-    //        return;
-
-    //    StartCoroutine(DoButtonPressAndRelease(this.ButtonDeal));
-
-    //    Log("Deal Pressed. Checking result.");
-    //    if (!this.isGoodDeal)
-    //    {
-    //        GetComponent<KMBombModule>().HandleStrike();
-    //        RenewDeal();
-    //    }
-    //    else
-    //    {
-    //        this.moduleSolved = true;
-    //        ClearDisplay(true); // clear display fast
-
-    //        GetComponent<KMBombModule>().HandlePass();
-    //    }
-    //}
-
 
     // Use this for initialization
     public void Start()
@@ -149,6 +157,9 @@ public class CharacterCodes : MonoBehaviour
         }
         this.chosenLetters = chosenLetterKVs.Select(x => x.Value).ToArray();
         this.expectedCode = chosenLetterKVs.SelectMany(x => GetDigits(x.Key)).ToArray();
+        this.enteredCode = new List<byte>(this.expectedCode.Length);
+
+        Log("Letter generation finished. Expected code: " + string.Join(null, this.expectedCode.Select(x => x.ToString()).ToArray()));
     }
 
     private List<byte> GetDigits(ushort number)
@@ -166,14 +177,13 @@ public class CharacterCodes : MonoBehaviour
 
     float i = 0;
     const int framesPerUpdate = 5;
-    bool textIsStillUpdating = false;
     public void Update()
     {
         this.i += Time.deltaTime * 60;
         if (this.i > framesPerUpdate)
         {
             this.i %= framesPerUpdate;
-           
+
         }
     }
 
@@ -232,9 +242,4 @@ public class CharacterCodes : MonoBehaviour
     //            yield break;
     //    }
     //}
-
-    private T PickSeededRandom<T>(List<T> source)
-    {
-        return source[rand.Next(0, source.Count)];
-    }
 }
