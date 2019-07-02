@@ -14,9 +14,10 @@ MonoBehaviour:
   id: characterCodes
   title: Character Codes
   author: GHXX
-  description: "Adds a module which is all about making good deals with different
-    currencies and items.\r\nNow it's your turn to make the right deals.\r\n\r\nModule
-    ID: thedealmaker\r\n\r\nSupports TwitchPlays!\r\n\r\nManual: https://ktane.timwi.de/HTML/The%20Dealmaker.html"
+  description: "Adds a module which is all about reading wierd sombols from a display
+    and then converting them into a number. Although the display can be a bit difficult
+    to read.\n\nModule ID: characterCodes\r\n\r\nSupports TwitchPlays!\r\n\r\nManual:
+    https://ktane.timwi.de/HTML/Character%20Codes.html"
   version: 1.0
   outputFolder: build
-  previewImage: {fileID: 2800000, guid: 9396fa11d597c3544aa05b8ef57a3522, type: 3}
+  previewImage: {fileID: 2800000, guid: 26fb81fb91f57b5409e67f7c3be3ed54, type: 3}

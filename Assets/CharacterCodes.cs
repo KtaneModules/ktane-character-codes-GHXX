@@ -154,9 +154,9 @@ public class CharacterCodes : MonoBehaviour
         // set button positions
         for (int i = 1; i < 10; i++)
         {
-            this.NumberButtons[i].transform.position = this.NumberButtons[0].transform.position;
+            var btn1Pos = this.NumberButtons[0].transform.localPosition;
+            this.NumberButtons[i].transform.localPosition = new Vector3(btn1Pos.x + 0.0245f * (i % 5), btn1Pos.y, btn1Pos.z - 0.028f * (i / 5));
             this.NumberButtons[i].transform.localScale = this.NumberButtons[0].transform.localScale;
-            this.NumberButtons[i].transform.Translate(0.0245f * (i % 5), 0.028f * (i / 5), 0);
         }
         GetComponent<KMBombModule>().OnActivate += ModuleActivated;
 
@@ -221,7 +221,7 @@ public class CharacterCodes : MonoBehaviour
             SetRandomDisplayBlackening();
         }
 
-        if (this.LCDRenderMesh.enabled)
+        if (this.LCDRenderMesh.enabled) // TODO maybe move to one material per module
         {
             this.LCDCoverUpMaterial.mainTextureOffset = Vector2.MoveTowards(this.LCDCoverUpMaterial.mainTextureOffset, Vector2.zero, .1f);
             this.LCDCoverUpMaterial.mainTextureScale = Vector2.Scale(this.LCDCoverUpMaterial.mainTextureScale, new Vector2((float)(rand.NextDouble() * 0.05 + 0.95), (float)(rand.NextDouble() * 0.05 + 0.95)));
