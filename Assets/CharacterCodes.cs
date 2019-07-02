@@ -16,6 +16,8 @@ public class CharacterCodes : MonoBehaviour
     public Material LCDCoverUpMaterial;
     public MeshRenderer LCDRenderMesh;
 
+    private Material LCDCoverUpMaterialCopy;
+
 
     static int moduleIdCounter = 1;
     int moduleId;
@@ -148,8 +150,9 @@ public class CharacterCodes : MonoBehaviour
     public void Start()
     {
         this.moduleId = moduleIdCounter++;
-        Log("Initialized with seed: " + rand.Seed);
         this.DisplayTextMesh.text = ""; // clear display
+        this.LCDCoverUpMaterialCopy = new Material(this.LCDCoverUpMaterial);
+        this.LCDRenderMesh.material = this.LCDCoverUpMaterialCopy;
 
         // set button positions
         for (int i = 1; i < 10; i++)
@@ -183,21 +186,20 @@ public class CharacterCodes : MonoBehaviour
     private void SetRandomDisplayBlackening()
     {
         this.LCDRenderMesh.enabled = true;
-        this.LCDCoverUpMaterial.mainTextureOffset = new Vector2((float)(rand.NextDouble() * 2 - 1), (float)(rand.NextDouble() * 2 - 1));
-        this.LCDCoverUpMaterial.mainTextureScale = new Vector2((float)(rand.NextDouble() * 2 - 1), (float)(rand.NextDouble() * 2 - 1));
+        this.LCDCoverUpMaterialCopy.mainTextureOffset = new Vector2((float)(rand.NextDouble() * 2 - 1), (float)(rand.NextDouble() * 2 - 1));
+        this.LCDCoverUpMaterialCopy.mainTextureScale = new Vector2((float)(rand.NextDouble() * 2 - 1), (float)(rand.NextDouble() * 2 - 1));
     }
 
     private List<byte> GetDigits(ushort number)
     {
         var result = new List<byte>();
         var factor = 1;
-        while (factor < ushort.MaxValue)
+        while (factor < ushort.MaxValue && number >= factor)
         {
             result.Add((byte)(number % (10 * factor) / factor));
             factor *= 10;
         }
-        bool wasNonZeroOnce = false;
-        return result.TakeWhile(x => wasNonZeroOnce = x != 0).Reverse().Cast<byte>().ToList();
+        return result.Cast<byte>().Reverse().ToList();
     }
 
     float i = 0;
@@ -213,20 +215,16 @@ public class CharacterCodes : MonoBehaviour
         }
     }
 
-    private IEnumerator BlackenDisplay(bool initial = true)
+    private IEnumerator BlackenDisplay()
     {
-        if (initial)
-        {
-            this.lcdIsBlackened = true;
-            SetRandomDisplayBlackening();
-        }
+        this.lcdIsBlackened = true;
+        SetRandomDisplayBlackening();
 
-        if (this.LCDRenderMesh.enabled) // TODO maybe move to one material per module
+        while (this.LCDRenderMesh.enabled) // TODO maybe move to one material per module
         {
-            this.LCDCoverUpMaterial.mainTextureOffset = Vector2.MoveTowards(this.LCDCoverUpMaterial.mainTextureOffset, Vector2.zero, .1f);
-            this.LCDCoverUpMaterial.mainTextureScale = Vector2.Scale(this.LCDCoverUpMaterial.mainTextureScale, new Vector2((float)(rand.NextDouble() * 0.05 + 0.95), (float)(rand.NextDouble() * 0.05 + 0.95)));
+            this.LCDCoverUpMaterialCopy.mainTextureOffset = Vector2.MoveTowards(this.LCDCoverUpMaterialCopy.mainTextureOffset, Vector2.zero, .1f);
+            this.LCDCoverUpMaterialCopy.mainTextureScale = Vector2.Scale(this.LCDCoverUpMaterialCopy.mainTextureScale, new Vector2((float)(rand.NextDouble() * 0.05 + 0.95), (float)(rand.NextDouble() * 0.05 + 0.95)));
             yield return new WaitForSeconds(0.05f);
-            yield return BlackenDisplay(false);
         }
     }
 
@@ -251,7 +249,6 @@ public class CharacterCodes : MonoBehaviour
             gs.fontSize = lastFontSize + 1;
             size = gs.CalcSize(new GUIContent(this.DisplayTextMesh.text));
         }
-        Log("Scale limit was: " + (size.x >= rectSize.x ? "X" : "Y"));
         tm.fontSize = lastFontSize;
     }
 
