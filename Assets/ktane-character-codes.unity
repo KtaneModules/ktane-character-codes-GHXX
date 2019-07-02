@@ -237,23 +237,6 @@ Prefab:
       propertyPath: m_Name
       value: CharacterCodesModule
       objectReference: {fileID: 0}
-    - target: {fileID: 102771934815503970, guid: d1637bd62fb3a4d4bb0d461cd51e5c11,
-        type: 2}
-      propertyPath: m_FontSize
-      value: 56
-      objectReference: {fileID: 0}
-    - target: {fileID: 4587280979442542, guid: d1637bd62fb3a4d4bb0d461cd51e5c11, type: 2}
-      propertyPath: m_LocalPosition.y
-      value: 0.0022
-      objectReference: {fileID: 0}
-    - target: {fileID: 4449618648635682, guid: d1637bd62fb3a4d4bb0d461cd51e5c11, type: 2}
-      propertyPath: m_LocalPosition.y
-      value: 0.45
-      objectReference: {fileID: 0}
-    - target: {fileID: 4629916568741322, guid: d1637bd62fb3a4d4bb0d461cd51e5c11, type: 2}
-      propertyPath: m_LocalPosition.y
-      value: 0.67
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: d1637bd62fb3a4d4bb0d461cd51e5c11, type: 2}
   m_IsPrefabParent: 0
