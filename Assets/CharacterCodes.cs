@@ -31,7 +31,7 @@ public class CharacterCodes : MonoBehaviour
         {5,"♣"},{33,"!"},{113,"≋"},{986,"æ"},{6,"♠"},{34,"“"},{114,"∞"},{987,"ϛ"},
         {7,"•"},{35,"#"},{115,"①"},{990,"ʒ"},{8,"◘"},{36,"$"},{116,"②"},{991,"ϟ"},
         {9,"○"},{37,"%"},{120,"③"},{992,"ə"},{10,"◙"},{38,"&"},{121,"④"},{993,"Ω"},
-        {11,"♂"},{39,"Խ"},{122,"⑤"},{994,"Ϣ"},{12,"♀"},{40,"("},{123,"⑥"},{995,"ζ"},
+        {11,"♂"},{39,"Ö"},{122,"⑤"},{994,"Ϣ"},{12,"♀"},{40,"("},{123,"⑥"},{995,"ζ"},
         {13,"♪"},{41,")"},{124,"⑦"},{996,"Ϥ"},{14,"♫"},{42,"*"},{125,"⑧"},{998,"Ϧ"},
         {15,"☼"},{43,"+"},{126,"⑨"},{999,"ϧ"},{16,"►"},{44,","},{130,"⓪"},{1000,"✦"},
         {17,"◄"},{45,"-"},{132,"☣"},{1002,"Ϫ"},{18,"↕"},{46,"|"},{134,"☑"},{1004,"Ϭ"},
@@ -147,6 +147,7 @@ public class CharacterCodes : MonoBehaviour
         this.enteredCode = new List<byte>(this.expectedCode.Length);
 
         Log("Letter generation finished. Expected code: " + string.Join(null, this.expectedCode.Select(x => x.ToString()).ToArray()));
+        Log("Grouped code: " + string.Join(" ", chosenLetterKVs.Select(x => x.Key.ToString()).ToArray()));
     }
 
     private void DisableDisplayBlackening()
