@@ -47,6 +47,7 @@ public class CharacterCodes : MonoBehaviour
     private List<byte> enteredCode;
     private string[] chosenLetters = new string[5];
     private bool lcdIsBlackened = false;
+    private Coroutine _buttonAnimation;
 
     private void ModuleActivated()
     {
@@ -57,6 +58,7 @@ public class CharacterCodes : MonoBehaviour
             var digit = byte.Parse(this.NumberButtons[i].name.Last().ToString());
             var button = this.NumberButtons[i];
             this.NumberButtons[i].OnInteract += () => { NumberButtonPress(digit, button); return false; };
+            this.NumberButtons[i].OnInteractEnded += () => { NumberButtonRelease(digit, button); };
         }
         this.DisplayButton.OnInteract += () => { DisplayButtonPress(); return false; };
     }
@@ -71,13 +73,30 @@ public class CharacterCodes : MonoBehaviour
 
     private void NumberButtonPress(byte digit, KMSelectable button)
     {
+        // Animation, sounds, interaction punch.
+        button.AddInteractionPunch(0.5f);
+        this.Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, button.transform);
+        if (_buttonAnimation != null)
+            StopCoroutine(_buttonAnimation);
+        _buttonAnimation = StartCoroutine(ButtonAnimation(button, true));
+
         if (this.moduleSolved)
             return;
 
         this.enteredCode.Add(digit);
         RecheckCode();
+    }
 
-        StartCoroutine(DoButtonPressAndRelease(button));
+    private void NumberButtonRelease(byte digit, KMSelectable button)
+    {
+        // Animation, sounds.
+        this.Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonRelease, button.transform);
+        if (_buttonAnimation != null)
+            StopCoroutine(_buttonAnimation);
+        _buttonAnimation = StartCoroutine(ButtonAnimation(button, false));
+
+        if (this.moduleSolved)
+            return;
     }
 
     private void RecheckCode()
@@ -108,14 +127,19 @@ public class CharacterCodes : MonoBehaviour
         }
     }
 
-    IEnumerator DoButtonPressAndRelease(KMSelectable button)
+    private IEnumerator ButtonAnimation(KMSelectable button, bool isPress)
     {
-        button.AddInteractionPunch(1);
-        button.transform.Translate(0, 0, -0.005f);
-        this.Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, button.transform);
-        yield return new WaitForSeconds(0.2f);
-        button.transform.Translate(0, 0, 0.005f);
-        this.Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonRelease, button.transform);
+        var duration = 0.1f;
+        var elapsed = 0f;
+        var curPos = button.transform.localPosition;
+        var goal = isPress ? 0.01f : 0.0134f;
+        while (elapsed < duration)
+        {
+            button.transform.localPosition = new Vector3(curPos.x, Mathf.Lerp(curPos.y, goal, elapsed / duration), curPos.z);
+            yield return null;
+            elapsed += Time.deltaTime;
+        }
+        button.transform.localPosition = new Vector3(curPos.x, goal, curPos.z);
     }
 
     // Use this for initialization
@@ -275,6 +299,18 @@ public class CharacterCodes : MonoBehaviour
 
             default:
                 yield break;
+        }
+    }
+
+    private IEnumerator TwitchHandleForcedSolve()
+    {
+        var code = expectedCode.Select(i => (int)i).ToArray();
+        for (int i = enteredCode.Count; i < code.Length; i++)
+        {
+            NumberButtons[(code[i] + 9) % 10].OnInteract();
+            yield return new WaitForSeconds(0.1f);
+            NumberButtons[(code[i] + 9) % 10].OnInteractEnded();
+            yield return new WaitForSeconds(0.3f);
         }
     }
 }
