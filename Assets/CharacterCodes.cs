@@ -132,7 +132,7 @@ public class CharacterCodes : MonoBehaviour
         var duration = 0.1f;
         var elapsed = 0f;
         var curPos = button.transform.localPosition;
-        var goal = isPress ? 0.01f : 0.0134f;
+        var goal = isPress ? 0.011f : 0.0134f;
         while (elapsed < duration)
         {
             button.transform.localPosition = new Vector3(curPos.x, Mathf.Lerp(curPos.y, goal, elapsed / duration), curPos.z);
